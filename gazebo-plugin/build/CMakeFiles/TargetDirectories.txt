@@ -1,0 +1,3 @@
+/home/vlsh/pirouette/gazebo-plugin/build/CMakeFiles/MyIgnitionGazeboPlugin.dir
+/home/vlsh/pirouette/gazebo-plugin/build/CMakeFiles/edit_cache.dir
+/home/vlsh/pirouette/gazebo-plugin/build/CMakeFiles/rebuild_cache.dir
