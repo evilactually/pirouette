@@ -8,7 +8,7 @@ set(CMAKE_DEPENDS_LANGUAGES
 
 # The set of dependency files which are needed:
 set(CMAKE_DEPENDS_DEPENDENCY_FILES
-  "/home/vlsh/Sources/pirouette/gazebo-plugin/AckermannSteering.cc" "CMakeFiles/MyIgnitionGazeboPlugin.dir/AckermannSteering.cc.o" "gcc" "CMakeFiles/MyIgnitionGazeboPlugin.dir/AckermannSteering.cc.o.d"
+  "/home/vlsh/Sources/pirouette/gazebo-plugin/HelloWorld.cc" "CMakeFiles/HelloWorld.dir/HelloWorld.cc.o" "gcc" "CMakeFiles/HelloWorld.dir/HelloWorld.cc.o.d"
   )
 
 # Targets to which this target links.

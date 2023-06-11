@@ -1,4 +1,4 @@
-# Install script for directory: /home/vlsh/pirouette/gazebo-plugin
+# Install script for directory: /home/vlsh/Sources/pirouette/gazebo-plugin
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/vlsh/pirouette/gazebo-plugin/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/vlsh/Sources/pirouette/gazebo-plugin/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

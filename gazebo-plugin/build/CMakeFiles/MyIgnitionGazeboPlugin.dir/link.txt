@@ -1,1 +1,1 @@
-/usr/bin/c++ -fPIC -shared -Wl,-soname,libMyIgnitionGazeboPlugin.so -o libMyIgnitionGazeboPlugin.so CMakeFiles/MyIgnitionGazeboPlugin.dir/hello_world.cc.o 
+/usr/bin/c++ -fPIC -shared -Wl,-soname,libMyIgnitionGazeboPlugin.so -o libMyIgnitionGazeboPlugin.so CMakeFiles/MyIgnitionGazeboPlugin.dir/AckermannSteering.cc.o 

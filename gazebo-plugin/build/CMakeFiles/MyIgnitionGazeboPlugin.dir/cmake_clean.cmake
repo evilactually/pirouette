@@ -1,6 +1,6 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/MyIgnitionGazeboPlugin.dir/hello_world.cc.o"
-  "CMakeFiles/MyIgnitionGazeboPlugin.dir/hello_world.cc.o.d"
+  "CMakeFiles/MyIgnitionGazeboPlugin.dir/AckermannSteering.cc.o"
+  "CMakeFiles/MyIgnitionGazeboPlugin.dir/AckermannSteering.cc.o.d"
   "libMyIgnitionGazeboPlugin.pdb"
   "libMyIgnitionGazeboPlugin.so"
 )
