@@ -256,32 +256,32 @@ void AckermannSteering::Configure(const Entity &_entity,
             << std::endl;
   }
 
-  if (_sdf->HasElement("use_actuator_msg") &&
-    _sdf->Get<bool>("use_actuator_msg"))
-  {
-    if (_sdf->HasElement("actuator_number"))
-    {
-      this->dataPtr->actuatorNumber =
-        _sdf->Get<int>("actuator_number");
-      this->dataPtr->useActuatorMsg = true;
-      if (!this->dataPtr->steeringOnly)
-      {
-        this->dataPtr->steeringOnly = true;
-      }
-    }
-    else
-    {
-      gzerr << "Please specify an actuator_number" <<
-        "to use Actuator position message control." << std::endl;
-    }
-  }
+  // if (_sdf->HasElement("use_actuator_msg") &&
+  //   _sdf->Get<bool>("use_actuator_msg"))
+  // {
+  //   if (_sdf->HasElement("actuator_number"))
+  //   {
+  //     this->dataPtr->actuatorNumber =
+  //       _sdf->Get<int>("actuator_number");
+  //     this->dataPtr->useActuatorMsg = true;
+  //     if (!this->dataPtr->steeringOnly)
+  //     {
+  //       this->dataPtr->steeringOnly = true;
+  //     }
+  //   }
+  //   else
+  //   {
+  //     gzerr << "Please specify an actuator_number" <<
+  //       "to use Actuator position message control." << std::endl;
+  //   }
+  // }
 
   // Get params from SDF
+  // Steering
   auto sdfLeftSteerElem = _sdf->FindElement("left_steering_joint");
   while (sdfLeftSteerElem)
   {
-    this->dataPtr->leftSteeringJointNames.push_back(
-                          sdfLeftSteerElem->Get<std::string>());
+    this->dataPtr->leftSteeringJointNames.push_back(sdfLeftSteerElem->Get<std::string>());
     sdfLeftSteerElem = sdfLeftSteerElem->GetNextElement(
       "left_steering_joint");
   }
@@ -293,6 +293,7 @@ void AckermannSteering::Configure(const Entity &_entity,
     sdfRightSteerElem = sdfRightSteerElem->GetNextElement(
       "right_steering_joint");
   }
+  // Ground drive
   if (!this->dataPtr->steeringOnly)
   {
     auto sdfLeftElem = _sdf->FindElement("left_joint");
@@ -388,30 +389,35 @@ void AckermannSteering::Configure(const Entity &_entity,
   std::vector<std::string> topics;
 
 
-  if (_sdf->HasElement("topic"))
-  {
-    topics.push_back(_sdf->Get<std::string>("topic"));
-  }
-  else if (_sdf->HasElement("sub_topic"))
-  {
-    topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) +
-      "/" + _sdf->Get<std::string>("sub_topic"));
-  }
-  else if ((this->dataPtr->steeringOnly) &&
-    (!this->dataPtr->useActuatorMsg))
-  {
-    topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) +
-      "/steer_angle");
-  }
-  else if ((this->dataPtr->steeringOnly) &&
-    (this->dataPtr->useActuatorMsg))
-  {
-    topics.push_back("/actuators");
-  }
-  else if (!this->dataPtr->steeringOnly)
-  {
-    topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) + "/cmd_vel");
-  }
+  // if (_sdf->HasElement("topic"))
+  // {
+  //   topics.push_back(_sdf->Get<std::string>("topic"));
+  // }
+  // else if (_sdf->HasElement("sub_topic"))
+  // {
+  //   topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) +
+  //     "/" + _sdf->Get<std::string>("sub_topic"));
+  // }
+  // else if ((this->dataPtr->steeringOnly) &&
+  //   (!this->dataPtr->useActuatorMsg))
+  // {
+  //   topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) +
+  //     "/steer_angle");
+  // }
+  // else if ((this->dataPtr->steeringOnly) &&
+  //   (this->dataPtr->useActuatorMsg))
+  // {
+  //   topics.push_back("/actuators");
+  // }
+  //else if (!this->dataPtr->steeringOnly)
+  //{
+  topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) + "/cmd_vel");
+  //}
+
+  topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) + "/front_right/wheel_cmd");
+  topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) + "/front_left/wheel_cmd");
+  topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) + "/rear_right/wheel_cmd");
+  topics.push_back("/model/" + this->dataPtr->model.Name(_ecm) + "/rear_left/wheel_cmd");
 
   auto topic = validTopic(topics);
   if (topic.empty())
@@ -420,77 +426,57 @@ void AckermannSteering::Configure(const Entity &_entity,
            << "Failed to initialize." << std::endl;
     return;
   }
-  if (this->dataPtr->steeringOnly)
+
+
+  this->dataPtr->node.Subscribe(topic, &AckermannSteeringPrivate::OnCmdVel,
+    this->dataPtr.get());
+  gzmsg << "AckermannSteering subscribing to twist messages on ["
+        << topic << "]" << std::endl;
+
+
+  std::vector<std::string> odomTopics;
+  if (_sdf->HasElement("odom_topic"))
   {
-    if (this->dataPtr->useActuatorMsg)
-    {
-      this->dataPtr->node.Subscribe(topic,
-        &AckermannSteeringPrivate::OnActuatorAng,
-        this->dataPtr.get());
-      gzmsg << "AckermannSteering subscribing to Actuator messages on ["
-            << topic << "]" << std::endl;
-    }
-    else
-    {
-      this->dataPtr->node.Subscribe(topic,
-        &AckermannSteeringPrivate::OnCmdAng,
-        this->dataPtr.get());
-      gzmsg << "AckermannSteering subscribing to float messages on ["
-            << topic << "]" << std::endl;
-    }
+    odomTopics.push_back(_sdf->Get<std::string>("odom_topic"));
   }
-  else
+  odomTopics.push_back("/model/" + this->dataPtr->model.Name(_ecm) +
+      "/odometry");
+  auto odomTopic = validTopic(odomTopics);
+  if (topic.empty())
   {
-    this->dataPtr->node.Subscribe(topic, &AckermannSteeringPrivate::OnCmdVel,
-      this->dataPtr.get());
-    gzmsg << "AckermannSteering subscribing to twist messages on ["
-          << topic << "]" << std::endl;
+    gzerr << "AckermannSteering plugin received invalid model name "
+          << "Failed to initialize." << std::endl;
+    return;
   }
-  if (!this->dataPtr->steeringOnly)
+
+  this->dataPtr->odomPub = this->dataPtr->node.Advertise<msgs::Odometry>(
+      odomTopic);
+
+  std::vector<std::string> tfTopics;
+  if (_sdf->HasElement("tf_topic"))
   {
-    std::vector<std::string> odomTopics;
-    if (_sdf->HasElement("odom_topic"))
-    {
-      odomTopics.push_back(_sdf->Get<std::string>("odom_topic"));
-    }
-    odomTopics.push_back("/model/" + this->dataPtr->model.Name(_ecm) +
-        "/odometry");
-    auto odomTopic = validTopic(odomTopics);
-    if (topic.empty())
-    {
-      gzerr << "AckermannSteering plugin received invalid model name "
-            << "Failed to initialize." << std::endl;
-      return;
-    }
-
-    this->dataPtr->odomPub = this->dataPtr->node.Advertise<msgs::Odometry>(
-        odomTopic);
-
-    std::vector<std::string> tfTopics;
-    if (_sdf->HasElement("tf_topic"))
-    {
-      tfTopics.push_back(_sdf->Get<std::string>("tf_topic"));
-    }
-    tfTopics.push_back("/model/" + this->dataPtr->model.Name(_ecm) +
-      "/tf");
-    auto tfTopic = validTopic(tfTopics);
-    if (tfTopic.empty())
-    {
-      gzerr << "AckermannSteering plugin invalid tf topic name "
-            << "Failed to initialize." << std::endl;
-      return;
-    }
-
-    this->dataPtr->tfPub = this->dataPtr->node.Advertise<msgs::Pose_V>(
-        tfTopic);
-
-    if (_sdf->HasElement("frame_id"))
-      this->dataPtr->sdfFrameId = _sdf->Get<std::string>("frame_id");
-
-    if (_sdf->HasElement("child_frame_id"))
-      this->dataPtr->sdfChildFrameId = _sdf->Get<std::string>("child_frame_id");
+    tfTopics.push_back(_sdf->Get<std::string>("tf_topic"));
   }
+  tfTopics.push_back("/model/" + this->dataPtr->model.Name(_ecm) +
+    "/tf");
+  auto tfTopic = validTopic(tfTopics);
+  if (tfTopic.empty())
+  {
+    gzerr << "AckermannSteering plugin invalid tf topic name "
+          << "Failed to initialize." << std::endl;
+    return;
+  }
+
+  this->dataPtr->tfPub = this->dataPtr->node.Advertise<msgs::Pose_V>(
+      tfTopic);
+
+  if (_sdf->HasElement("frame_id"))
+    this->dataPtr->sdfFrameId = _sdf->Get<std::string>("frame_id");
+
+  if (_sdf->HasElement("child_frame_id"))
+    this->dataPtr->sdfChildFrameId = _sdf->Get<std::string>("child_frame_id");
 }
+
 
 //////////////////////////////////////////////////
 void AckermannSteering::PreUpdate(const UpdateInfo &_info,
@@ -509,6 +495,7 @@ void AckermannSteering::PreUpdate(const UpdateInfo &_info,
   // If the joints haven't been identified yet, look for them
   static std::set<std::string> warnedModels;
   auto modelName = this->dataPtr->model.Name(_ecm);
+  // Left & right ground drive
   if (!this->dataPtr->steeringOnly &&
       (this->dataPtr->leftJoints.empty() ||
       this->dataPtr->rightJoints.empty()))
@@ -544,6 +531,7 @@ void AckermannSteering::PreUpdate(const UpdateInfo &_info,
       warnedModels.insert(modelName);
     }
   }
+  // Left & Right Steering joints
   if (this->dataPtr->leftSteeringJoints.empty() ||
       this->dataPtr->rightSteeringJoints.empty())
   {
@@ -579,6 +567,7 @@ void AckermannSteering::PreUpdate(const UpdateInfo &_info,
       warnedModels.insert(modelName);
     }
   }
+  // Terminate if joints not found
   if (!this->dataPtr->steeringOnly &&
     (this->dataPtr->leftJoints.empty() ||
     this->dataPtr->rightJoints.empty()))
@@ -602,7 +591,7 @@ void AckermannSteering::PreUpdate(const UpdateInfo &_info,
     for (Entity joint : this->dataPtr->leftJoints)
     {
       // Update wheel velocity
-      auto vel = _ecm.Component<components::JointVelocityCmd>(joint);
+      auto vel = _ecm.Component<components::JointVelocityCmd>(joint); // Components are values associated with an entity
 
       if (vel == nullptr)
       {

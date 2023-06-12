@@ -227,6 +227,7 @@ impl<'a> GenericPath<'a> {
 }
 
 // BASIC PRINCIPLE:
+// ARTICULATED CASTER STEERING
 // Imagine a chair with caster wheels.
 // Observe that Wheels always align with their velocity vector.
 // You can do many types of motion with caster wheels.

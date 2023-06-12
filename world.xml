@@ -34,7 +34,7 @@
         </light>
 
         <model name="ground_plane">
-            <plugin name="hello_world" filename="/home/vlsh/pirouette/gazebo-plugin/build/libhello_world.so"/>
+            <plugin name="hello_world::HelloWorld" filename="/home/vlsh/Sources/gz-sim/examples/plugin/hello_world/build/libHelloWorld.so"/>
             <static>true</static>
             <link name="link">
                 <collision name="collision">
